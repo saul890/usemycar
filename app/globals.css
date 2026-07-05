@@ -1,0 +1,5 @@
+/* globals.css — imported once in the root layout.
+   These three lines activate all of Tailwind's utility classes. */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;

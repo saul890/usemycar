@@ -1,0 +1,22 @@
+# Dependencies
+/node_modules
+
+# Next.js build output
+/.next/
+/out/
+
+# Environment variables — NEVER commit these
+.env
+.env.local
+.env.production
+
+# OS files
+.DS_Store
+
+# Claude Code config — not needed in the repo
+.mcp.json
+.claude/
+
+# TypeScript
+*.tsbuildinfo
+next-env.d.ts
