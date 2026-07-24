@@ -3,7 +3,7 @@
 // It reads the user's session from HTTP cookies (managed by the middleware).
 // The try/catch in setAll is intentional: Server Components can't set cookies —
 // only the middleware can. We let middleware handle session refreshes.
-import { createServerClient } from '@supabase/ssr'
+import { createServerClient, type CookieOptions } from '@supabase/ssr'
 import { cookies } from 'next/headers'
 
 export async function createClient() {
@@ -17,7 +17,7 @@ export async function createClient() {
         getAll() {
           return cookieStore.getAll()
         },
-        setAll(cookiesToSet) {
+        setAll(cookiesToSet: { name: string; value: string; options: CookieOptions }[]) {
           try {
             cookiesToSet.forEach(({ name, value, options }) =>
               cookieStore.set(name, value, options)
