@@ -19,6 +19,7 @@ export default function OnboardingPage() {
   const [fullName, setFullName] = useState('')
   const [address, setAddress] = useState<SelectedAddress | null>(null)
   const [unitNumber, setUnitNumber] = useState('')
+  const [phone, setPhone] = useState('')
   const [avatarFile, setAvatarFile] = useState<File | null>(null)
   const [avatarPreview, setAvatarPreview] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
@@ -96,6 +97,7 @@ export default function OnboardingPage() {
       full_name: fullName,
       building_id: buildingId,
       unit_number: unitNumber,
+      phone: phone || null,
       avatar_url: avatarUrl,
     })
 
@@ -165,6 +167,23 @@ export default function OnboardingPage() {
               placeholder="4B"
               className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             />
+          </div>
+
+          <div>
+            <label htmlFor="phone" className="block text-sm font-medium text-gray-700 mb-1">
+              Phone number
+            </label>
+            <input
+              id="phone"
+              type="tel"
+              value={phone}
+              onChange={e => setPhone(e.target.value)}
+              placeholder="0400 000 000"
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            />
+            <p className="mt-1 text-xs text-gray-400">
+              Only shown to neighbours who click into a car you've listed — optional, but they'll need a way to reach you.
+            </p>
           </div>
 
           {error && <p className="text-sm text-red-600">{error}</p>}

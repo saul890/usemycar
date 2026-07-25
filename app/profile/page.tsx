@@ -17,6 +17,7 @@ export default function ProfilePage() {
   const [userId, setUserId] = useState<string | null>(null)
   const [fullName, setFullName] = useState('')
   const [unitNumber, setUnitNumber] = useState('')
+  const [phone, setPhone] = useState('')
   const [currentAddress, setCurrentAddress] = useState('')
   const [buildingId, setBuildingId] = useState<string | null>(null)
   const [newAddress, setNewAddress] = useState<SelectedAddress | null>(null)
@@ -41,13 +42,14 @@ export default function ProfilePage() {
 
       const { data: profile } = await supabase
         .from('profiles')
-        .select('full_name, unit_number, avatar_url, building_id, buildings (formatted_address)')
+        .select('full_name, unit_number, phone, avatar_url, building_id, buildings (formatted_address)')
         .eq('id', user.id)
         .single()
 
       if (profile) {
         setFullName(profile.full_name ?? '')
         setUnitNumber(profile.unit_number ?? '')
+        setPhone(profile.phone ?? '')
         setAvatarPreview(profile.avatar_url ?? null)
         setBuildingId(profile.building_id ?? null)
         // Supabase's inferred type for this embedded relation is an array
@@ -123,6 +125,7 @@ export default function ProfilePage() {
       full_name: fullName,
       building_id: resolvedBuildingId,
       unit_number: unitNumber,
+      phone: phone || null,
       avatar_url: avatarUrl,
     })
 
@@ -208,6 +211,23 @@ export default function ProfilePage() {
               placeholder="4B"
               className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             />
+          </div>
+
+          <div>
+            <label htmlFor="phone" className="block text-sm font-medium text-gray-700 mb-1">
+              Phone number
+            </label>
+            <input
+              id="phone"
+              type="tel"
+              value={phone}
+              onChange={e => setPhone(e.target.value)}
+              placeholder="0400 000 000"
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            />
+            <p className="mt-1 text-xs text-gray-400">
+              Only shown to neighbours who click into a car you've listed.
+            </p>
           </div>
 
           {error && <p className="text-sm text-red-600">{error}</p>}

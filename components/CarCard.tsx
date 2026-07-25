@@ -1,7 +1,9 @@
-// components/CarCard.tsx — displays a single car listing.
+// components/CarCard.tsx — displays a single car listing as a link to its
+// full detail page (app/cars/[id]/page.tsx).
 // Used by the browse page. Server Component — no interactivity needed.
+import Link from 'next/link'
 
-type Car = {
+export type Car = {
   id: string
   make: string
   model: string
@@ -21,7 +23,7 @@ type Car = {
 }
 
 // Converts the stored availability fields into a human-readable string.
-function formatAvailability(car: Car): string {
+export function formatAvailability(car: Car): string {
   if (car.availability_type === 'date_range' && car.available_from && car.available_to) {
     const fmt = (d: string) =>
       new Date(d).toLocaleDateString('en-AU', { day: 'numeric', month: 'short' })
@@ -42,7 +44,10 @@ export default function CarCard({ car }: { car: Car }) {
     : '?'
 
   return (
-    <div className="bg-white border border-gray-200 rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-shadow">
+    <Link
+      href={`/cars/${car.id}`}
+      className="block bg-white border border-gray-200 rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-shadow"
+    >
 
       {/* Car photo — grey placeholder with a car icon if no photo */}
       <div className="h-44 bg-gray-100 flex items-center justify-center">
@@ -113,6 +118,6 @@ export default function CarCard({ car }: { car: Car }) {
         </div>
 
       </div>
-    </div>
+    </Link>
   )
 }

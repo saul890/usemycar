@@ -185,3 +185,14 @@ create policy "Available cars are viewable by residents of the same building"
       select id from public.profiles where building_id = public.get_my_building_id()
     ))
   );
+
+
+-- ============================================================================
+-- UseMyCar — Database Schema (Section 3: contact by phone)
+-- No payments/booking yet, so interested residents contact a car's owner
+-- directly. Phone is only ever queried/shown on a car's own detail page
+-- (app/cars/[id]/page.tsx), never in the browse grid — same RLS-level access
+-- as unit_number, just not fetched until someone opens the listing.
+-- ============================================================================
+
+alter table public.profiles add column phone text;
