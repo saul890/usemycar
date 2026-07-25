@@ -49,7 +49,7 @@ create table public.cars (
   owner_id uuid not null references public.profiles (id) on delete cascade,
   make text not null,
   model text not null,
-  year integer not null,
+  year integer,
   colour text,
   photo_url text,
   daily_rate numeric(10, 2),

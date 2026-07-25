@@ -5,7 +5,7 @@ type Car = {
   id: string
   make: string
   model: string
-  year: number
+  year: number | null
   colour: string | null
   photo_url: string | null
   daily_rate: number | null
@@ -69,9 +69,11 @@ export default function CarCard({ car }: { car: Car }) {
           <h2 className="font-semibold text-gray-900 text-base">
             {car.make} {car.model}
           </h2>
-          <p className="text-sm text-gray-500">
-            {car.year}{car.colour ? ` · ${car.colour}` : ''}
-          </p>
+          {(car.year || car.colour) && (
+            <p className="text-sm text-gray-500">
+              {[car.year, car.colour].filter(Boolean).join(' · ')}
+            </p>
+          )}
         </div>
 
         {/* Daily rate */}

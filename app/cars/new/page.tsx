@@ -21,6 +21,8 @@ export default function NewCarPage() {
   const [year, setYear] = useState('')
   const [colour, setColour] = useState('')
   const [dailyRate, setDailyRate] = useState('')
+  const [photoFile, setPhotoFile] = useState<File | null>(null)
+  const [photoPreview, setPhotoPreview] = useState<string | null>(null)
 
   // Availability
   const [availabilityType, setAvailabilityType] = useState<AvailabilityType>('always')
@@ -36,6 +38,13 @@ export default function NewCarPage() {
     setAvailableDays(prev =>
       prev.includes(day) ? prev.filter(d => d !== day) : [...prev, day]
     )
+  }
+
+  function handlePhotoChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0]
+    if (!file) return
+    setPhotoFile(file)
+    setPhotoPreview(URL.createObjectURL(file))
   }
 
   async function handleSubmit(e: React.FormEvent) {
@@ -58,12 +67,37 @@ export default function NewCarPage() {
       return
     }
 
+    // Generate the car's id up front so the photo (if any) can be uploaded
+    // and named after it before the row itself is inserted.
+    const carId = crypto.randomUUID()
+    let photoUrl: string | null = null
+
+    if (photoFile) {
+      const ext = photoFile.name.split('.').pop()
+      const path = `${carId}.${ext}`
+
+      const { error: uploadError } = await supabase.storage
+        .from('car-images')
+        .upload(path, photoFile)
+
+      if (uploadError) {
+        setError('Photo upload failed. Please try again.')
+        setLoading(false)
+        return
+      }
+
+      const { data: urlData } = supabase.storage.from('car-images').getPublicUrl(path)
+      photoUrl = urlData.publicUrl
+    }
+
     const { error: insertError } = await supabase.from('cars').insert({
+      id: carId,
       owner_id: user.id,
       make,
       model,
-      year: parseInt(year, 10),
+      year: year ? parseInt(year, 10) : null,
       colour: colour || null,
+      photo_url: photoUrl,
       daily_rate: parseFloat(dailyRate),
       available: true,
       availability_type: availabilityType,
@@ -90,6 +124,26 @@ export default function NewCarPage() {
       <p className="text-sm text-gray-500 mb-8">Share your car with your neighbours.</p>
 
       <form onSubmit={handleSubmit} className="space-y-5">
+
+        {/* ── Photo ── */}
+        <div className="flex flex-col items-center gap-3">
+          <div className="w-full h-40 rounded-xl bg-gray-100 overflow-hidden flex items-center justify-center border border-gray-200">
+            {photoPreview ? (
+              <img src={photoPreview} alt="Car photo preview" className="w-full h-full object-cover" />
+            ) : (
+              <svg className="w-10 h-10 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5}
+                  d="M9 17a2 2 0 11-4 0 2 2 0 014 0zM19 17a2 2 0 11-4 0 2 2 0 014 0z" />
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5}
+                  d="M13 16V6a1 1 0 00-1-1H4a1 1 0 00-1 1v10l2 2h6l2-2zm4 0V8a1 1 0 00-1-1h-3" />
+              </svg>
+            )}
+          </div>
+          <label className="cursor-pointer text-sm text-blue-600 hover:underline font-medium">
+            {photoPreview ? 'Change photo' : 'Add a photo (optional)'}
+            <input type="file" accept="image/*" onChange={handlePhotoChange} className="hidden" />
+          </label>
+        </div>
 
         {/* ── Make + Model ── */}
         <div className="grid grid-cols-2 gap-3">
@@ -128,7 +182,6 @@ export default function NewCarPage() {
               type="number"
               value={year}
               onChange={e => setYear(e.target.value)}
-              required
               min={1980}
               max={new Date().getFullYear() + 1}
               placeholder="2020"
