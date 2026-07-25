@@ -6,7 +6,7 @@ import './globals.css'
 import Nav from '@/components/Nav'
 
 export const metadata: Metadata = {
-  title: 'UseMyCar',
+  title: 'Use My Car',
   description: 'Borrow a neighbour\'s car',
 }
 

@@ -47,7 +47,7 @@ export default function LoginPage() {
     <div className="min-h-screen flex items-center justify-center px-4 bg-white">
       <div className="w-full max-w-sm">
         <h1 className="text-2xl font-semibold text-gray-900 mb-1">Welcome back</h1>
-        <p className="text-sm text-gray-500 mb-8">Sign in to UseMyCar</p>
+        <p className="text-sm text-gray-500 mb-8">Sign in to Use My Car</p>
 
         <form onSubmit={handleLogin} className="space-y-4">
           <div>

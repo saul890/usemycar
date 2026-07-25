@@ -14,7 +14,7 @@ export default async function Nav() {
       <div className="max-w-5xl mx-auto px-4 h-14 flex items-center justify-between">
         {/* App name / logo */}
         <Link href="/" className="font-semibold text-gray-900 tracking-tight">
-          UseMyCar
+          Use My Car
         </Link>
 
         {/* Right-side links */}
