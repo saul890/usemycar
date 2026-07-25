@@ -50,7 +50,10 @@ export default function ProfilePage() {
         setUnitNumber(profile.unit_number ?? '')
         setAvatarPreview(profile.avatar_url ?? null)
         setBuildingId(profile.building_id ?? null)
-        setCurrentAddress((profile.buildings as { formatted_address: string } | null)?.formatted_address ?? '')
+        // Supabase's inferred type for this embedded relation is an array
+        // (it can't tell the FK is many-to-one without generated types), but
+        // it's always a single object at runtime — confirmed in testing.
+        setCurrentAddress((profile.buildings as unknown as { formatted_address: string } | null)?.formatted_address ?? '')
       }
       setInitialLoading(false)
     }
