@@ -90,14 +90,18 @@ create policy "Users can delete their own car listings"
 
 -- ----------------------------------------------------------------------------
 -- TABLE: buildings
--- One row per physical building. Keyed by Geoapify's stable place_id (not by
--- the formatted address text, which is more fragile to compare) so that two
+-- One row per physical building. Keyed by formatted_address so that two
 -- residents picking the same address land on the same building row.
+-- NOTE: place_id is stored for reference but is NOT the dedup key — Geoapify's
+-- place_id encodes which underlying data source answered a given request and
+-- can differ between identical queries for the same address (confirmed by
+-- testing: same address, two calls, two different place_ids). formatted_address
+-- was the stable one in practice.
 -- ----------------------------------------------------------------------------
 create table public.buildings (
   id uuid primary key default gen_random_uuid(),
-  place_id text not null unique,
-  formatted_address text not null,
+  place_id text not null,
+  formatted_address text not null unique,
   latitude double precision not null,
   longitude double precision not null,
   created_at timestamptz not null default now()
@@ -132,7 +136,7 @@ set search_path = public
 as $$
   insert into public.buildings (place_id, formatted_address, latitude, longitude)
   values (p_place_id, p_formatted, p_lat, p_lon)
-  on conflict (place_id) do update set formatted_address = excluded.formatted_address
+  on conflict (formatted_address) do update set place_id = excluded.place_id
   returning id
 $$;
 
@@ -196,3 +200,26 @@ create policy "Available cars are viewable by residents of the same building"
 -- ============================================================================
 
 alter table public.profiles add column phone text;
+
+
+-- ============================================================================
+-- UseMyCar — Database Schema (Section 4: resident count feedback)
+-- Shown right after picking an address in AddressAutocomplete, so a resident
+-- can tell if they matched an existing building ("3 residents already here")
+-- or likely picked the wrong one ("You'll be the first here").
+-- security definer because, by definition, the person checking doesn't
+-- belong to that building yet — the normal "same building" RLS on profiles
+-- would otherwise always return 0.
+-- ============================================================================
+
+create function public.count_building_residents(p_building_id uuid)
+returns bigint
+language sql
+security definer
+set search_path = public
+stable
+as $$
+  select count(*) from public.profiles where building_id = p_building_id
+$$;
+
+revoke execute on function public.count_building_residents(uuid) from anon;

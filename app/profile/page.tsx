@@ -189,7 +189,8 @@ export default function ProfilePage() {
 
           <AddressAutocomplete
             id="address"
-            label="Address"
+            label="Building address"
+            helperText="Your building's street address — not your unit. Only change this if you've moved to a new building."
             initialValue={currentAddress}
             onSelect={address => {
               setNewAddress(address)

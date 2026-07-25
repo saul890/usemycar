@@ -150,7 +150,12 @@ export default function OnboardingPage() {
             />
           </div>
 
-          <AddressAutocomplete id="address" label="Address" onSelect={setAddress} />
+          <AddressAutocomplete
+            id="address"
+            label="Building address"
+            helperText="Your building's street address — not your unit. You'll enter your unit number separately below."
+            onSelect={setAddress}
+          />
 
           <div>
             <label htmlFor="unitNumber" className="block text-sm font-medium text-gray-700 mb-1">
