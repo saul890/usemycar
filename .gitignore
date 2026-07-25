@@ -22,3 +22,5 @@
 next-env.d.ts
 .vercel
 .env*
+
+# test: verifying Vercel <-> GitHub auto-deploy connection
