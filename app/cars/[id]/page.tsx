@@ -124,7 +124,7 @@ export default async function CarDetailPage({ params }: { params: Promise<{ id: 
                 </a>
               ) : (
                 <p className="text-sm text-gray-400">
-                  This resident hasn't added a phone number yet — try the resident directory.
+                  This resident hasn't added a phone number yet
                 </p>
               )}
             </div>
