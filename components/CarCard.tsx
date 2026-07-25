@@ -2,6 +2,7 @@
 // full detail page (app/cars/[id]/page.tsx).
 // Used by the browse page. Server Component — no interactivity needed.
 import Link from 'next/link'
+import { Car as CarIcon, Calendar } from 'lucide-react'
 
 export type Car = {
   id: string
@@ -58,12 +59,7 @@ export default function CarCard({ car }: { car: Car }) {
             className="w-full h-full object-cover"
           />
         ) : (
-          <svg className="w-12 h-12 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5}
-              d="M9 17a2 2 0 11-4 0 2 2 0 014 0zM19 17a2 2 0 11-4 0 2 2 0 014 0z" />
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5}
-              d="M13 16V6a1 1 0 00-1-1H4a1 1 0 00-1 1v10l2 2h6l2-2zm4 0V8a1 1 0 00-1-1h-3" />
-          </svg>
+          <CarIcon className="w-12 h-12 text-gray-300" strokeWidth={1.5} />
         )}
       </div>
 
@@ -89,10 +85,7 @@ export default function CarCard({ car }: { car: Car }) {
 
         {/* Availability */}
         <div className="flex items-center gap-1.5 text-xs text-gray-500">
-          <svg className="w-3.5 h-3.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
-              d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-          </svg>
+          <Calendar className="w-3.5 h-3.5 flex-shrink-0" />
           <span>{formatAvailability(car)}</span>
         </div>
 

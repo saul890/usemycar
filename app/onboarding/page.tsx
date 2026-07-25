@@ -11,6 +11,7 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
+import { User } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 import AddressAutocomplete, { type SelectedAddress } from '@/components/AddressAutocomplete'
 
@@ -124,10 +125,7 @@ export default function OnboardingPage() {
               {avatarPreview ? (
                 <img src={avatarPreview} alt="Your photo preview" className="w-full h-full object-cover" />
               ) : (
-                <svg className="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5}
-                    d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                </svg>
+                <User className="w-8 h-8 text-gray-400" strokeWidth={1.5} />
               )}
             </div>
             {/* Hidden file input triggered by the label */}

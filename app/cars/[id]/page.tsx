@@ -10,6 +10,7 @@
 // info" rather than publishing it on every card.
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
+import { Car as CarIcon, Calendar } from 'lucide-react'
 import { createClient } from '@/lib/supabase/server'
 import { formatAvailability, type Car } from '@/components/CarCard'
 
@@ -65,12 +66,7 @@ export default async function CarDetailPage({ params }: { params: Promise<{ id: 
               className="w-full h-full object-cover"
             />
           ) : (
-            <svg className="w-20 h-20 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5}
-                d="M9 17a2 2 0 11-4 0 2 2 0 014 0zM19 17a2 2 0 11-4 0 2 2 0 014 0z" />
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5}
-                d="M13 16V6a1 1 0 00-1-1H4a1 1 0 00-1 1v10l2 2h6l2-2zm4 0V8a1 1 0 00-1-1h-3" />
-            </svg>
+            <CarIcon className="w-20 h-20 text-gray-300" strokeWidth={1.5} />
           )}
         </div>
 
@@ -93,10 +89,7 @@ export default async function CarDetailPage({ params }: { params: Promise<{ id: 
               <span className="text-sm font-normal text-gray-400"> / day</span>
             </p>
             <div className="flex items-center gap-1.5 text-sm text-gray-500">
-              <svg className="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
-                  d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-              </svg>
+              <Calendar className="w-4 h-4 flex-shrink-0" />
               <span>{formatAvailability(car as unknown as Car)}</span>
             </div>
           </div>

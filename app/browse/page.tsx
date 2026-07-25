@@ -1,8 +1,8 @@
-// browse/page.tsx — public page showing all available cars.
+// browse/page.tsx — shows available cars from the viewer's own building.
 // This is a Server Component: data is fetched on the server before the page is sent
 // to the browser, so there's no loading spinner — the cars are already there on arrival.
-// The page is public (no login required) — the Supabase RLS policy allows anyone
-// to read rows where available = true.
+// Protected by middleware — building-scoping only works once we know who's viewing.
+import { Car as CarIcon } from 'lucide-react'
 import { createClient } from '@/lib/supabase/server'
 import CarCard from '@/components/CarCard'
 
@@ -50,12 +50,7 @@ export default async function BrowsePage() {
         </div>
       ) : (
         <div className="flex flex-col items-center justify-center py-24 text-center">
-          <svg className="w-12 h-12 text-gray-200 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5}
-              d="M9 17a2 2 0 11-4 0 2 2 0 014 0zM19 17a2 2 0 11-4 0 2 2 0 014 0z" />
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5}
-              d="M13 16V6a1 1 0 00-1-1H4a1 1 0 00-1 1v10l2 2h6l2-2zm4 0V8a1 1 0 00-1-1h-3" />
-          </svg>
+          <CarIcon className="w-12 h-12 text-gray-200 mb-4" strokeWidth={1.5} />
           <p className="text-gray-400 text-sm">No cars listed yet.</p>
           <p className="text-gray-400 text-sm">Be the first to share yours!</p>
         </div>

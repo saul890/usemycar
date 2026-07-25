@@ -4,7 +4,6 @@
 // they're logged in. No JavaScript is sent to the browser for this component.
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
-import SignOutButton from './SignOutButton'
 
 export default async function Nav() {
   const supabase = await createClient()
@@ -26,9 +25,8 @@ export default async function Nav() {
 
           {user ? (
             <>
-              <Link href="/residents" className="text-sm text-gray-600 hover:text-gray-900 transition-colors">
-                Residents
-              </Link>
+              {/* Residents directory link hidden for now — see app/residents/page.tsx
+                  (RESIDENTS_PAGE_ENABLED) to bring it back. */}
               <Link href="/profile" className="text-sm text-gray-600 hover:text-gray-900 transition-colors">
                 Profile
               </Link>
@@ -38,7 +36,6 @@ export default async function Nav() {
               >
                 List your car
               </Link>
-              <SignOutButton />
             </>
           ) : (
             <>

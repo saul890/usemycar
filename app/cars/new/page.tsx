@@ -7,6 +7,7 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
+import { Car as CarIcon } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 
 const DAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
@@ -131,12 +132,7 @@ export default function NewCarPage() {
             {photoPreview ? (
               <img src={photoPreview} alt="Car photo preview" className="w-full h-full object-cover" />
             ) : (
-              <svg className="w-10 h-10 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5}
-                  d="M9 17a2 2 0 11-4 0 2 2 0 014 0zM19 17a2 2 0 11-4 0 2 2 0 014 0z" />
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5}
-                  d="M13 16V6a1 1 0 00-1-1H4a1 1 0 00-1 1v10l2 2h6l2-2zm4 0V8a1 1 0 00-1-1h-3" />
-              </svg>
+              <CarIcon className="w-10 h-10 text-gray-300" strokeWidth={1.5} />
             )}
           </div>
           <label className="cursor-pointer text-sm text-blue-600 hover:underline font-medium">

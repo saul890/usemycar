@@ -9,8 +9,10 @@
 
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
+import { User } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 import AddressAutocomplete, { type SelectedAddress } from '@/components/AddressAutocomplete'
+import SignOutButton from '@/components/SignOutButton'
 
 export default function ProfilePage() {
   const router = useRouter()
@@ -162,10 +164,7 @@ export default function ProfilePage() {
               {avatarPreview ? (
                 <img src={avatarPreview} alt="Your photo preview" className="w-full h-full object-cover" />
               ) : (
-                <svg className="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5}
-                    d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                </svg>
+                <User className="w-8 h-8 text-gray-400" strokeWidth={1.5} />
               )}
             </div>
             <label className="cursor-pointer text-sm text-blue-600 hover:underline font-medium">
@@ -241,6 +240,10 @@ export default function ProfilePage() {
             {loading ? 'Saving…' : 'Save changes'}
           </button>
         </form>
+
+        <div className="mt-6 pt-6 border-t border-gray-100 text-center">
+          <SignOutButton />
+        </div>
       </div>
     </div>
   )
