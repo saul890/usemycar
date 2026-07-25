@@ -1,122 +1,156 @@
 'use client'
-// onboarding/page.tsx — profile completion step shown right after signing up.
-// Collects the user's name, address (→ building), unit number, and an
-// optional profile photo.
-// Steps:
-//  1. (Optional) Upload photo → stored in Supabase Storage "avatars" bucket.
-//  2. Get the public URL of the uploaded photo.
-//  3. Resolve the picked address to a building_id via find_or_create_building.
-//  4. Save name + building_id + unit + photo URL to the "profiles" table.
-//  5. Redirect to /browse.
+// profile/page.tsx — lets an existing resident edit their name, address,
+// unit number, and photo after onboarding.
+// Address behaviour: the field starts pre-filled with the resident's current
+// building address. If they never touch it, their building_id is left alone
+// on save. If they type in it, they must pick a new suggestion before saving
+// (same "must select, not free-type" rule as onboarding) — that new address
+// is resolved to a (possibly new) building via find_or_create_building.
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import AddressAutocomplete, { type SelectedAddress } from '@/components/AddressAutocomplete'
 
-export default function OnboardingPage() {
+export default function ProfilePage() {
   const router = useRouter()
+  const [userId, setUserId] = useState<string | null>(null)
   const [fullName, setFullName] = useState('')
-  const [address, setAddress] = useState<SelectedAddress | null>(null)
   const [unitNumber, setUnitNumber] = useState('')
+  const [currentAddress, setCurrentAddress] = useState('')
+  const [buildingId, setBuildingId] = useState<string | null>(null)
+  const [newAddress, setNewAddress] = useState<SelectedAddress | null>(null)
+  const [addressTouched, setAddressTouched] = useState(false)
   const [avatarFile, setAvatarFile] = useState<File | null>(null)
   const [avatarPreview, setAvatarPreview] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
+  const [message, setMessage] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
+  const [initialLoading, setInitialLoading] = useState(true)
+
+  useEffect(() => {
+    async function loadProfile() {
+      const supabase = createClient()
+      const { data: { user } } = await supabase.auth.getUser()
+
+      if (!user) {
+        router.push('/login')
+        return
+      }
+      setUserId(user.id)
+
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('full_name, unit_number, avatar_url, building_id, buildings (formatted_address)')
+        .eq('id', user.id)
+        .single()
+
+      if (profile) {
+        setFullName(profile.full_name ?? '')
+        setUnitNumber(profile.unit_number ?? '')
+        setAvatarPreview(profile.avatar_url ?? null)
+        setBuildingId(profile.building_id ?? null)
+        setCurrentAddress((profile.buildings as { formatted_address: string } | null)?.formatted_address ?? '')
+      }
+      setInitialLoading(false)
+    }
+
+    loadProfile()
+  }, [router])
 
   function handleAvatarChange(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0]
     if (!file) return
     setAvatarFile(file)
-    // createObjectURL gives us a temporary local URL for the preview — no upload yet.
     setAvatarPreview(URL.createObjectURL(file))
   }
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
 
-    if (!address) {
+    if (addressTouched && !newAddress) {
       setError('Please select your address from the suggestions.')
       return
     }
 
     setLoading(true)
     setError(null)
+    setMessage(null)
 
     const supabase = createClient()
-    const { data: { user } } = await supabase.auth.getUser()
+    let resolvedBuildingId = buildingId
 
-    if (!user) {
-      router.push('/login')
-      return
+    if (addressTouched && newAddress) {
+      const { data, error: buildingError } = await supabase.rpc('find_or_create_building', {
+        p_place_id: newAddress.placeId,
+        p_formatted: newAddress.formatted,
+        p_lat: newAddress.lat,
+        p_lon: newAddress.lon,
+      })
+      if (buildingError) {
+        setError('Could not save your address. Please try again.')
+        setLoading(false)
+        return
+      }
+      resolvedBuildingId = data
     }
 
-    // Resolve the picked address to a building row (creating one if this is
-    // the first resident from that building) before saving the profile.
-    const { data: buildingId, error: buildingError } = await supabase.rpc('find_or_create_building', {
-      p_place_id: address.placeId,
-      p_formatted: address.formatted,
-      p_lat: address.lat,
-      p_lon: address.lon,
-    })
+    let avatarUrl = avatarPreview
 
-    if (buildingError) {
-      setError('Could not save your address. Please try again.')
-      setLoading(false)
-      return
-    }
-
-    let avatarUrl: string | null = null
-
-    // Upload the photo if one was chosen.
-    if (avatarFile) {
+    if (avatarFile && userId) {
       const ext = avatarFile.name.split('.').pop()
-      // Name the file after the user's ID so each user only ever has one avatar.
-      const path = `${user.id}.${ext}`
+      const path = `${userId}.${ext}`
 
       const { error: uploadError } = await supabase.storage
         .from('avatars')
         .upload(path, avatarFile, { upsert: true })
 
       if (uploadError) {
-        setError('Photo upload failed — you can add one later.')
+        setError('Photo upload failed — you can try again.')
         setLoading(false)
         return
       }
 
-      // getPublicUrl constructs the public URL; it never fails.
       const { data: urlData } = supabase.storage.from('avatars').getPublicUrl(path)
       avatarUrl = urlData.publicUrl
     }
 
-    // upsert = insert if the row doesn't exist, update if it does.
-    // Safe to call multiple times (e.g., if the user refreshes mid-way).
     const { error: profileError } = await supabase.from('profiles').upsert({
-      id: user.id,
+      id: userId,
       full_name: fullName,
-      building_id: buildingId,
+      building_id: resolvedBuildingId,
       unit_number: unitNumber,
       avatar_url: avatarUrl,
     })
 
+    setLoading(false)
+
     if (profileError) {
       setError('Could not save your profile. Please try again.')
-      setLoading(false)
       return
     }
 
-    router.push('/browse')
+    setBuildingId(resolvedBuildingId)
+    if (addressTouched && newAddress) {
+      setCurrentAddress(newAddress.formatted)
+      setAddressTouched(false)
+      setNewAddress(null)
+    }
+    setMessage('Profile updated.')
     router.refresh()
+  }
+
+  if (initialLoading) {
+    return <div className="min-h-screen flex items-center justify-center bg-white" />
   }
 
   return (
     <div className="min-h-screen flex items-center justify-center px-4 bg-white">
       <div className="w-full max-w-sm">
-        <h1 className="text-2xl font-semibold text-gray-900 mb-1">Tell us about yourself</h1>
-        <p className="text-sm text-gray-500 mb-8">Help your neighbours know who you are.</p>
+        <h1 className="text-2xl font-semibold text-gray-900 mb-1">Your profile</h1>
+        <p className="text-sm text-gray-500 mb-8">Update your details or move to a new building.</p>
 
         <form onSubmit={handleSubmit} className="space-y-5">
-          {/* Profile photo picker */}
           <div className="flex flex-col items-center gap-3">
             <div className="w-20 h-20 rounded-full bg-gray-100 overflow-hidden flex items-center justify-center border border-gray-200">
               {avatarPreview ? (
@@ -128,9 +162,8 @@ export default function OnboardingPage() {
                 </svg>
               )}
             </div>
-            {/* Hidden file input triggered by the label */}
             <label className="cursor-pointer text-sm text-blue-600 hover:underline font-medium">
-              {avatarPreview ? 'Change photo' : 'Add a photo (optional)'}
+              {avatarPreview ? 'Change photo' : 'Add a photo'}
               <input type="file" accept="image/*" onChange={handleAvatarChange} className="hidden" />
             </label>
           </div>
@@ -145,12 +178,19 @@ export default function OnboardingPage() {
               value={fullName}
               onChange={e => setFullName(e.target.value)}
               required
-              placeholder="Jane Smith"
               className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             />
           </div>
 
-          <AddressAutocomplete id="address" label="Address" onSelect={setAddress} />
+          <AddressAutocomplete
+            id="address"
+            label="Address"
+            initialValue={currentAddress}
+            onSelect={address => {
+              setNewAddress(address)
+              setAddressTouched(true)
+            }}
+          />
 
           <div>
             <label htmlFor="unitNumber" className="block text-sm font-medium text-gray-700 mb-1">
@@ -168,13 +208,14 @@ export default function OnboardingPage() {
           </div>
 
           {error && <p className="text-sm text-red-600">{error}</p>}
+          {message && <p className="text-sm text-green-600">{message}</p>}
 
           <button
             type="submit"
             disabled={loading}
             className="w-full py-2 px-4 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
           >
-            {loading ? 'Saving…' : 'Save and continue'}
+            {loading ? 'Saving…' : 'Save changes'}
           </button>
         </form>
       </div>

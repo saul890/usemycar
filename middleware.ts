@@ -36,7 +36,7 @@ export async function middleware(request: NextRequest) {
   const { data: { user } } = await supabase.auth.getUser()
 
   // Pages that work without being logged in.
-  const publicPaths = ['/login', '/signup', '/auth', '/browse', '/forgot-password', '/reset-password']
+  const publicPaths = ['/login', '/signup', '/auth', '/forgot-password', '/reset-password']
   const isPublic = publicPaths.some(p => request.nextUrl.pathname.startsWith(p))
 
   if (!user && !isPublic) {

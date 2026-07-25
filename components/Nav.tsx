@@ -29,6 +29,9 @@ export default async function Nav() {
               <Link href="/residents" className="text-sm text-gray-600 hover:text-gray-900 transition-colors">
                 Residents
               </Link>
+              <Link href="/profile" className="text-sm text-gray-600 hover:text-gray-900 transition-colors">
+                Profile
+              </Link>
               <Link
                 href="/cars/new"
                 className="text-sm bg-blue-600 text-white px-3 py-1.5 rounded-lg hover:bg-blue-700 transition-colors font-medium"
